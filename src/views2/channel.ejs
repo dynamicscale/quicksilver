@@ -1,0 +1,156 @@
+<% include header.ejs %>
+
+<!--div class='midbar'>
+    <div style='margin:0 auto; width:1200px; padding:130px 0 23px 0;'>
+        <h3><span style='color:#eee; font-weight:normal;'>Channel:</span> <%= channelData.info.name %></h3>
+        <div class='clr'></div>
+    </div>
+</div-->
+
+<div class='topbar'>
+    <div style='margin:0 auto; width:1200px;'>
+        <!--a href='/' class='logolink'><img src='images/logoicon.png' height='30' /></a-->
+        <% if (typeof(selectedClient) != 'undefined') { %>
+            <div style='float:left;'>
+                <div class='clientmenu'><%= selectedClient.name %>:  <%= channelData.info.name %></div>
+            </div>
+        <% } %>    
+    </div>    
+</div>
+
+<div class='vlinkbox'>
+    
+    <!--div style='margin:0 auto; width:1200px; padding:13px 0 23px 0;'>
+        <h3 style='color:#333;'><span style='color:#777; font-weight:normal; display:none;'>Channel:</span><%= channelData.info.name %></h3>
+        <div class='clr'></div>
+    </div-->
+    
+<ul class='vlink'>
+    <li><a href='/channel?id=<%= channelId %>' class='active'>Dashboard</a></li>
+    <li><a href='/bulkUploads?id=<%= channelId %>'>Bulk Uploads</a></li>
+    <li><a href='/channelSettings?id=<%= channelId %>'>Settings</a></li>
+    <li><a href='/testAPI?id=<%= channelId %>'>Test APIs</a></li>
+    <div class='clr'></div>
+</ul>
+</div>
+
+<div style='margin:10px auto; width:1210px;  padding:0px 0px 30px 0px; min-height:1000px;'>
+    
+    
+    
+    <div style='padding:0 5px;'>
+    <div style='border-bottom:0px solid #eee; padding:0px 0 20px 0; margin-top:30px;'>
+        
+        <div class='statbox'>
+            <div class='statbox-heading'>TOTAL POINTS INGESTED</div>
+            <div class='statbox-content'><%= hits %></div>
+        </div>
+        
+        <div class='statbox'>
+            <div class='statbox-heading'>TOTAL POINTS STREAMED</div>
+            <div class='statbox-content'>0</div>
+        </div>
+        
+        <div class='statbox'>
+            <div class='statbox-heading'>API REQUESTS</div>
+            <div class='statbox-content'>0</div>
+        </div>
+        
+        <div class='statbox'>
+            <div class='statbox-heading'>TIME SINCE LAST COMPUTATION</div>
+            <div class='statbox-content'>
+                <%
+                    if (channelData.info.lastrun) {
+                        var timeNow = (new Date).getTime();
+                        var timeSince = timeNow - channelData.info.lastrun;
+                        var timeSinceDisplay = parseInt(timeSince/(1000*60))
+                        var timeSinceDisplayUnit = 'min'
+                        if (timeSince > 3600) {
+                            timeSinceDisplay = parseInt(timeSince/(1000*60*60))
+                            timeSinceDisplayUnit = 'hrs'
+                        }
+                %>
+                ~<%= timeSinceDisplay %> <%= timeSinceDisplayUnit %>
+                <% } else { %>
+                    NA
+                <% } %>    
+            </div>
+        </div>
+        
+        <div class='clr'></div>
+        
+        
+        <div style='margin-top:25px;'>
+            
+        <div style='border-bottom:1px solid #eee; padding:0px 0 15px 0; margin-top:30px;  width:1180px'>
+            <div style='margin-top:8px; float:left;'>
+                <h1>Data Ingestion</h1>
+            </div>
+            <div class='clr'></div>
+        </div>    
+            
+        <div id="chart_div" style='height:300px;'></div>    
+            
+        </div>
+        </div>
+    </div>    
+</div>
+
+<script>
+    google.load('visualization', '1', {packages: ['corechart', 'bar']});
+    google.setOnLoadCallback(drawMultSeries);
+
+function drawMultSeries() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Time of Day');
+    //data.addColumn('number', 'Motivation Level');
+    data.addColumn('number', '');
+    //data.addColumn('number', '');
+
+      //data.addRows([
+      //  [{v: [8, 0, 0], f: '8 am'}, 1, .25],
+      //  [{v: [9, 0, 0], f: '9 am'}, 2, .5],
+      //  [{v: [10, 0, 0], f:'10 am'}, 3, 1],
+      //  [{v: [11, 0, 0], f: '11 am'}, 4, 2.25],
+      //  [{v: [12, 0, 0], f: '12 pm'}, 5, 2.25],
+      //  [{v: [13, 0, 0], f: '1 pm'}, 6, 3],
+      //  [{v: [14, 0, 0], f: '2 pm'}, 7, 4],
+      //  [{v: [15, 0, 0], f: '3 pm'}, 8, 5.25],
+      //  [{v: [16, 0, 0], f: '4 pm'}, 9, 7.5],
+      //  [{v: [17, 0, 0], f: '5 pm'}, 10, 10],
+      //]);
+  
+    var cdata = [];
+    <% chartData.forEach(function(cd) { %>
+        cdata.push([new Date('<%= cd[0] %>'), <%= cd[1] %>]);
+    <% }); %>    
+  
+  console.log(cdata);
+  
+    data.addRows(cdata);  
+      
+      var options = {
+        title: '',
+        hAxis: {
+          title: 'Date',
+          gridlines: {color: '#f6f6f6'}
+        },
+        vAxis: {
+          title: 'Data points ingested',
+          gridlines: {color: '#f6f6f6'}
+        },
+        colors: ['#81C9E8', '#81E9A8'],
+        legend: {'position' : 'none'},
+        top:0,
+        chartArea: {width : '1080', left:'100'}
+      };
+
+      var chart = new google.visualization.AreaChart(
+        document.getElementById('chart_div'));
+
+      chart.draw(data, options);
+    }
+</script>
+
+
+<% include footer.ejs %>

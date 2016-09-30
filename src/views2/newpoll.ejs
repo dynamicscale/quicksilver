@@ -1,0 +1,44 @@
+<% include header.ejs %>
+    <% var pollBoxWidth = 300; %>
+    <div style='background:#f7f7f7; margin:0px 20px 0 0; height:1760px; box-shadow: 0 0 5px #ccc; padding:20px 0px 20px 50px;'>
+        
+        <h1 style='padding-top:5px; margin-bottom:30px;'>New Poll <%= name %></h1>
+        
+        <form name='createPoll' method='POST' enctype='multipart/form-data' action='/createPoll' id='createPollForm'>
+        
+        <div class='addnewwrapper'>
+            <div class='addnewleft'>Title:</div>
+            <div class='addnewright'><input type='text' class='inputbox' name='title' /></div>
+        </div>
+        
+        <div class='addnewwrapper'>
+            <div class='addnewleft' style='margin-top:0px;'>Description:</div>
+            <div class='addnewright'><textarea class='inputbox' style='height:60px; font-size:13px;' name='desc'></textarea></div>
+        </div>
+        
+        <div class='addnewwrapper'>
+            <div class='addnewleft' style='margin-top:5px;'>Photo:</div>
+            <div class='addnewright'><input type='file' class='inputbox' style='border:none; font-size:15px;' name='pollPhoto'></textarea></div>
+        </div>
+        
+        <div class='addnewwrapper'>
+            <div class='addnewleft'>Choices:</div>
+            <div class='addnewright'>
+                <input type='text' class='inputbox' style='width:300px;' name='choices[]' />
+                <input type='text' class='inputbox' style='width:300px;' name='choices[]' />
+                <input type='text' class='inputbox' style='width:300px;' name='choices[]' />
+                <input type='text' class='inputbox' style='width:300px;' name='choices[]' />
+                <input type='text' class='inputbox' style='width:300px;' name='choices[]' />
+            </div>
+        </div>
+        
+        
+        <a style='display:block; float:left; background:#2ecc71; margin-left:320px; padding:15px; font:bold 20px "Bitter"; color:#fff; width:110px; border-radius:4px;' href='#' onclick="document.getElementById('createPollForm').submit();">Create Poll</a>
+        
+        <a style='display:block; margin-left:490px; background:#ddd; padding:15px; font:bold 20px "Bitter"; color:#999; width:70px; border-radius:4px;' href='/'>Cancel</a>
+        
+        </form>
+    </div>
+<% include footer.ejs %>
+
+ 

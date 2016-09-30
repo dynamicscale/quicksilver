@@ -1,0 +1,96 @@
+<%
+    selectedClient = clients[selectedClientId]
+%>    
+
+<div style='width:560px; padding:0px 20px 30px 20px;'>
+    <div style=' padding:0px 0 0px 0; margin-bottom:30px; border-bottom:1px solid #eee;'>
+        <div style='margin-top:15px; border-bottom:0px solid #eee; float:left'>
+            <div style='float:left;'><a href='#' onclick="showSelectedClientChannels(); return false;" class='tmenu tactive' id='selectedClientChannelsLink'><%= selectedClient['name'] %> Channels</a></div>
+            <div style='float:left; margin-left:30px;'><a href='#' onclick="showOtherClientChannels(); return false;" class='tmenu' id='otherClientChannelsLink'>Other Channels</a></div>
+            <div class='clr'></div>
+        </div>
+        <div class='clr'></div>
+    </div>
+    
+    <div id='selectedClientChannels'>
+    <%
+    var k = 1;
+    var numChannels = Object.keys(selectedClient.channels).length
+    for(var channelId in selectedClient.channels) {
+        channel = selectedClient.channels[channelId];
+    %>
+        <div style='padding-bottom:<% if (k < numChannels) { %>3<% } %>0px;'>
+        <a href='/channel?id=<%= channelId %>' style='font-family: "Open Sans", arial; font-size:16px; font-weight:bold;'><%= channel.info.name %></a>
+        <div style='margin-top:8px; color:#888; font-size:14px; font-family: "Open Sans", arial;'><%= channel.info.desc %></div>
+        <% if (typeof(channel.info.created) != 'undefined') { %>
+            <div style='margin-top:12px; color:#888; font-size:12px; font-style: italic;'>Created on <%= moment(parseInt(channel.info.created)).format('D MMMM, YYYY') %></div>
+        <% } %>
+        </div>
+    <%
+        k++;
+    }
+    %>
+    </div>
+    
+    <div id='otherChannels' style='display:none; height:400px; overflow:auto;'>
+    <ul>
+    <% var i = 0; %>
+    <% for(var clientId in clients) { 
+        client = clients[clientId];
+        if (clientId != selectedClientId && typeof(client.name) != 'undefined' && client.name) {
+    %>
+        <li style='margin-bottom:20px; <% if (i >= num-1) { %> border-bottom:none; <% } %>'>
+            <div style='font-family: "Open Sans", arial; font-size:16px; color:#666; font-weight:bold;'><%= client.name %></div>
+            <%
+                if (typeof(client.channels) != 'undefined') {
+            %>
+                <div style='margin-left:50px; margin-top:20px;'>
+            <%
+                    var k = 1;
+                    var numChannels = Object.keys(client.channels).length
+                    for(var channelId in client.channels) {
+                        channel = client.channels[channelId];
+            %>
+                        <div style='padding-bottom:<% if (k < numChannels) { %>3<% } %>0px;'>
+                        <a href='/channel?id=<%= channelId %>' style='font-family: "Open Sans", arial; font-size:16px;'><%= channel.info.name %></a>
+                        <div style='margin-top:8px; color:#888; font-size:14px; font-family: "Open Sans", arial;'><%= channel.info.desc %></div>
+                        <% if (typeof(channel.info.created) != 'undefined') { %>
+                            <div style='margin-top:12px; color:#888; font-size:12px; font-style: italic;'>Created on <%= moment(parseInt(channel.info.created)).format('D MMMM, YYYY') %></div>
+                        <% } %>
+                        </div>
+            <%
+                        k++;
+                    }
+            %>
+                </div>
+            <%    
+                } else {
+            %>
+                <div style='font-family: "Open Sans", arial; font-size:15px; color:#888; padding-top:30px; margin-left:50px;'>No channels have been created for <%= client.name %></div>    
+            
+            <% } %>
+        </li>
+        <% if (i%2 == 1) { %>
+            <div class='clr'></div>
+        <% } %>
+        
+        <% i++; %>
+    <% } } %>
+    </ul>
+    <div class='clr'></div>
+    </div>
+</div>
+<script>
+    function showSelectedClientChannels() {
+        $('#selectedClientChannelsLink').addClass('tactive');
+        $('#otherClientChannelsLink').removeClass('tactive');
+        $('#selectedClientChannels').show();
+        $('#otherChannels').hide();
+    }
+    function showOtherClientChannels() {
+        $('#selectedClientChannelsLink').removeClass('tactive');
+        $('#otherClientChannelsLink').addClass('tactive');
+        $('#selectedClientChannels').hide();
+        $('#otherChannels').show();
+    }
+</script>

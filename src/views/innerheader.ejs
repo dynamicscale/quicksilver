@@ -1,0 +1,23 @@
+<div class='topbar'>
+    <div style='margin:0 auto; width:1200px;'>
+        <% if (typeof(selectedClient) != 'undefined') { %>
+            <div style='float:left;'>
+                <div class='clientmenu'><%= selectedClient.name %>:  <%= channelData.info.name %></div>
+            </div>
+        <% } %>    
+    </div>    
+</div>
+
+<div class='vlinkbox'>    
+<ul class='vlink'>
+    <li><a href='/channel?id=<%= channelId %>' <% if(jview == 'dashboard') { %>class='active'<% } %>>Dashboard</a></li>
+    <li><a href='/bulkUploads?id=<%= channelId %>' <% if(jview == 'bulkuploads') { %>class='active'<% } %>>Bulk Uploads</a></li>
+    <li><a href='/contentBasedAttributes?id=<%= channelId %>' <% if(jview == 'contentAttributes') { %>class='active'<% } %>>Content Attributes</a></li>
+    <li><a href='/channelSettings?id=<%= channelId %>' <% if(jview == 'algos') { %>class='active'<% } %>>Algos</a></li>
+    <li><a href='/jobs?id=<%= channelId %>' <% if(jview == 'jobs') { %>class='active'<% } %>>Jobs</a></li>
+    <li><a href='/testAPI?id=<%= channelId %>' <% if(jview == 'testAPI') { %>class='active'<% } %>>Test APIs</a></li>
+    <li style='float:right;'><a href='/editChannelInfo?id=<%= channelId %>' <% if(jview == 'editChannel') { %>class='active'<% } %>>Edit Channel</a></li>
+    <li style='float:right;'><a href='/attributeCoverage?id=<%= channelId %>' <% if(jview == 'viewData') { %>class='active'<% } %>>View Data</a></li>
+    <div class='clr'></div>
+</ul>
+</div>

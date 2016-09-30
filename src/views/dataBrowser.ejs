@@ -1,0 +1,62 @@
+<% include header.ejs %>
+
+<div class='topbar'>
+    <div style='margin:0 auto; width:1200px;'>
+        <!--a href='/' class='logolink'><img src='images/logoicon.png' height='30' /></a-->
+        <% if (typeof(selectedClient) != 'undefined') { %>
+            <div style='float:left;'>
+                <div class='clientmenu'><%= selectedClient.name %>:  <%= channelData.info.name %></div>
+            </div>
+        <% } %>    
+    </div>    
+</div>
+
+<div class='vlinkbox'>
+    
+<ul class='vlink'>
+    <li><a href='/channel?id=<%= channelId %>'>Dashboard</a></li>
+    <li><a href='/bulkUploads?id=<%= channelId %>'>Bulk Uploads</a></li>
+    <li><a href='/dataBrowser?id=<%= channelId %>' class='active'>Data Browser</a></li>
+    <li><a href='/channelSettings?id=<%= channelId %>'>Settings</a></li>
+    <li><a href='/jobs?id=<%= channelId %>'>Jobs</a></li>
+    <li><a href='/testAPI?id=<%= channelId %>'>Test APIs</a></li>
+    <div class='clr'></div>
+</ul>
+</div>
+
+<div style='margin:10px auto; width:1210px;  padding:0px 0px 30px 0px; min-height:1000px;'>
+    <div style='padding:0 5px;'>
+        
+        <div style=' padding:0px 0 0px 0; margin-top:30px; border-bottom:1px solid #eee;'>
+            <div style='margin-top:15px; border-bottom:0px solid #eee; float:right'>
+                <div style='float:left;'><a href='/channelSettings?id=<%= channelId %>' class='tmenu tactive'>Customize Algos</a></div>
+                <div style='float:left; margin-left:30px;'><a href='/editChannelInfo?id=<%= channelId %>&type=item'  class='tmenu'>Edit Channel Info</a></div>
+                <div class='clr'></div>
+            </div>
+        
+            <h1 style='padding-top:10px;'>Data Browser</h1>
+            <div class='clr'></div>
+        </div>
+        
+        
+        <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin-top:20px;' class='dataBrowserTable'>
+            <tr>
+                <th width='450'>UserId</th>
+                <th width='250'>ItemId</th>
+                <th width='300'>Action</th>
+                <th width='300'>Mode of Ingestion</th>
+                <th width='300'>Date</th>
+            </tr>
+            <% data.forEach(function(row) { console.log(row);  %>
+                <tr>
+                    <td><%= row['_source']['userId'] %></td>
+                    <td><%= row['_source']['itemId'] %></td>
+                    <td><%= row['_source']['action'] %></td>
+                    <td><%= row['_source']['ingestion'] %></td>
+                    <td><%= row['_source']['time'] %></td>
+                </tr>
+            <% }) %>
+        </table>
+    </div>
+</div>
+<% include footer.ejs %>

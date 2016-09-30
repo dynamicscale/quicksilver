@@ -1,0 +1,59 @@
+body {
+  padding: 0;
+  margin:0;
+  font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background: #E2E3E5;
+}
+
+h1 {
+  font: 40px "Bitter";
+  margin-bottom: 10px;
+  margin-top:0px;
+  color:#D44F3B;
+}
+h2 {
+  font: 24px "Bitter";
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+h3 {
+  font-size: 15px;
+  font-weight: normal;
+  color:#777;
+  line-height: 150%;
+  margin-top:10px;
+  padding-top:0;
+}
+h2 a {
+  color:#000;
+}
+a {
+  text-decoration: none;
+}
+a:hover {
+  color: #3498db;
+}
+.pollbox {
+  display: block;
+  float:left;
+  width:300px;
+  padding:15px;
+  background:#fff;
+  box-shadow: 0 0 8px #ccc;
+  margin:20px;
+  height:250px;
+}
+.addnewwrapper{
+  margin-bottom:20px; font-size:20px;
+}
+.addnewleft{
+  float:left; width:300px; text-align:right; border-bottom:0px solid #eee; padding-bottom:5px; margin-top:7px; color:#555;
+}
+.addnewright{
+  margin-left: 320px;; width:300px;
+}
+.inputbox {
+  width:500px; padding:5px; border:1px solid #ccc; font-size:20px;
+}
+
+

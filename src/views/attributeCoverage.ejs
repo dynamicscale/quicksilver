@@ -1,0 +1,71 @@
+<% include header.ejs %>
+<% include innerheader.ejs %>
+
+<div style='margin:10px auto; width:1210px;  padding:0px 0px 30px 0px; min-height:1000px;'>
+    
+    <div style='padding:0 10px;'>
+        
+        <div style='padding:0px 0 0px 0; margin-top:30px; border-bottom:1px solid #eee;'>
+            
+            <div style='margin-top:15px; border-bottom:0px solid #eee; float:left'>
+                <div style='float:left;'><a href='/attributeCoverage?id=<%= channelId %>' class='tmenu<% if(1 == 1) { %> tactive<% } %>'>Attribute Coverage</a></div>
+                <div style='float:left; margin-left:30px;'><a href='/viewData?id=<%= channelId %>'  class='tmenu<% if(1 == 'item') { %> tactive<% } %>'>Individual Item Data</a></div>
+                <div class='clr'></div>
+            </div>
+            
+            <div class='clr'></div>
+
+        </div>
+    
+        <div style='border-bottom:1px solid #eee; padding:20px 0 15px 0;'>
+            <div style='margin-top:8px; float:left;'>
+                <h1 style='font-size:18px; color:#555;'><%= totalDocs %> Items</h1>
+            </div>
+            <div class='clr'></div>
+        </div>
+    
+        <div style='margin-top:20px; font-size:15px; color:#333;'>
+        <% if(Object.keys(coverage).length > 0) { bp = 0; %>    
+            <% for (var key in coverage) { %>
+                <%
+                    percentCoverage = parseInt((coverage[key]['doc_count']/totalDocs) * 100)
+                    totalWidth = 800
+                    coveredWidth = parseInt((800*percentCoverage)/100)
+                %>
+                    <div style='padding:15px 0; border-bottom:1px solid #f6f6f6; <% if(bp%2 == 1) { %>background:#fff<% } %>'>
+                    <div style='float:left; width:220px;'><%= attributeResults[key]['name'] %>:</div>
+                    <div style='float:left; width:800px; border:0px solid red; background:#ddd; border-radius:4px;'>
+                        <div style='float:left; width:<%= coveredWidth %>px; background:#5cb85c; line-height:10px; border-radius:4px; background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);'>
+                        &nbsp;
+                        </div>    
+                    </div>
+                    <div style='float:right; color:#777'>
+                        <%= percentCoverage %>%
+                    </div>
+                    <div style='clear:both'></div>
+                    </div>
+                
+            <% bp++; } %>
+        <% } else { %>
+            <div style='font-size:20px; text-align:center; color:#ccc'>
+                Not Provided
+            </div>
+        <% } %>
+        </div> 
+    </div>
+</div>    
+
+<script>
+    function getData() {
+        itemId = $('#itemId').val();
+        if (itemId) {
+            window.location = '/viewData?id=<%= channelId %>&item='+itemId;
+        }
+    }
+    
+  
+    
+    
+</script>
+
+<% include footer.ejs %>

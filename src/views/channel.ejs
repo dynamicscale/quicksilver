@@ -1,0 +1,187 @@
+<% include header.ejs %>
+<% include innerheader.ejs %>
+
+<div style='margin:10px auto; width:1210px;  padding:0px 0px 30px 0px; min-height:1000px;'>
+    <div style='padding:0 5px;'>
+    <div style='border-bottom:0px solid #eee; padding:0px 0 20px 0; margin-top:30px;'>
+    <% if(hits > 0) { %>
+    
+    <div style='background: linear-gradient(#f9f9f9, #fcfcfc); border-radius:5px; border:1px solid #eee; width:1180px; box-shadow:inset 0px 0px 5px 0px #f6f6f6'>
+        <div class='statbox'>
+            <div class='statbox-heading'>TOTAL POINTS INGESTED</div>
+            <div class='statbox-content'><%= hits %></div>
+        </div>
+        
+        <div class='statbox'>
+            <div class='statbox-heading'>USERS</div>
+            <div class='statbox-content'><%= numUsers %></div>
+        </div>
+        
+        <div class='statbox'>
+            <div class='statbox-heading'>ITEMS</div>
+            <div class='statbox-content'><%= numItems %></div>
+        </div>
+        
+        <div class='statbox' style='border:none;'>
+            <div class='statbox-heading'>API REQUESTS</div>
+            <div class='statbox-content'>
+                0  
+            </div>
+        </div>
+        
+        <div class='clr'></div>
+    </div>    
+        
+        <div style='border-bottom:1px solid #eee; padding:0px 0 20px 0; margin-top:40px; width:1175px;'>
+            
+            <div style='float:right'>
+                <a href='#' onclick='loadIngestionData("all"); return false;' id='ingestiondata_all' class='tmenu2 tactive2' style='border-bottom-left-radius:3px; border-top-left-radius:3px;'>All</a>
+                <a href='#' onclick='loadIngestionData("bulk"); return false;' id='ingestiondata_bulk' class='tmenu2' style='border-left:none;'>Bulk</a>
+                <a href='#' onclick='loadIngestionData("stream"); return false;' id='ingestiondata_stream' class='tmenu2' style='border-left:none; border-bottom-right-radius:3px; border-top-right-radius:3px;'>Stream</a>
+                <div class='clr'></div>
+            </div>
+            
+            
+            <h1 style='font-size:18px; color:#555;'>Data Ingestion <span style='font-weight:300; color:#777'>(Bulk & Stream)</span></h1>
+            
+            <div class='clr'></div>
+        </div>    
+        
+        <div id="chart_div" style='height:300px;'></div>    
+        
+        <div style='margin-top:30px'>
+        <div style='float:left; width:548px;'>
+            <div style='border-bottom:1px solid #eee; padding:0px 0 15px 0;'>
+                <div style='margin-top:8px; float:left;'>
+                    <h1 style='font-size:18px; color:#555;'>Actions</h1>
+                </div>
+                <div class='clr'></div>
+            </div>
+            <div id='actions_chart_div'></div>
+        </div>
+        
+        <div style='float:left; width:548px; margin-left:80px;'>
+            <div style='border-bottom:1px solid #eee; padding:0px 0 15px 0;'>
+                <div style='margin-top:8px; float:left;'>
+                    <h1 style='font-size:18px; color:#555;'>Ingestion</h1>
+                </div>
+                <div class='clr'></div>
+            </div>
+            <div id='ingestion_chart_div'></div>
+        </div>
+        
+        <div class='clr'></div>
+        </div>
+    <% } else { %>
+        <div style='background:#f8f8f8; margin-top:30px; padding:70px 0; text-align:center; font-size:30px; font-family:"Open Sans"; font-weight:300; color:#999'>
+            No data has been ingested yet.
+            <div style='margin-top:30px;'>
+                <a href='/bulkUpload?channel=<%= channelId %>' class='bluebutton' style='line-height:32px;'>Upload Data</a>
+            </div>
+        </div> 
+    <% } %>    
+    </div>    
+</div>
+</div>
+<script>
+    google.load('visualization', '1', {packages: ['corechart', 'bar']});
+    google.setOnLoadCallback(drawMultSeries);
+
+function drawMultSeries() {
+    
+    <% if(chartData.length > 0) { %>
+        var cdata = [];
+        <% chartData.forEach(function(cd) { %>
+            cdata.push([new Date('<%= cd[0] %>'), <%= cd[1] %>]);
+        <% }); %>    
+        drawDataIngestionChart(cdata);
+    <% } %>
+    
+    /**
+     * Actions pie chart
+     */ 
+    
+    var options = {
+        title: '',
+        pieHole: 0.4,
+        colors: ['#85DCF0', '#FEDC78', '#FAA5C4', '#84C197', '#FF635D'],
+        width: '548',
+        height: '300',
+        chartArea: {width : '100%', left:'0', height: '1800', top: '30'}
+    };
+    
+    <% if(hitsByAction.length > 0) { %>
+        cdata = [['Action','No. of Data Points']];
+        <% hitsByAction.forEach(function(cd) { %>
+            cdata.push(['<%= cd[0] %>', <%= cd[1] %>]);
+        <% }); %>    
+              
+        data = google.visualization.arrayToDataTable(cdata)
+          
+        var chart = new google.visualization.PieChart(document.getElementById('actions_chart_div'));
+        chart.draw(data, options);
+    <% } %>
+            
+    /**
+     * Ingestion method pie chart
+     */
+    
+    data = new google.visualization.DataTable();
+
+    <% if(hitsByIngestionMethod.length > 0) { %>
+        cdata = [['Ingestion Method','No. of Data Points']];
+        <% hitsByIngestionMethod.forEach(function(cd) { %>
+            cdata.push(['<%= cd[0] %>', <%= cd[1] %>]);
+        <% }); %>    
+      
+        data = google.visualization.arrayToDataTable(cdata)  
+          
+        var chart = new google.visualization.PieChart(document.getElementById('ingestion_chart_div'));
+        chart.draw(data, options);
+    <% } %>    
+}
+
+function drawDataIngestionChart(cdata) {
+    var options = {
+        title: '',
+        hAxis: {
+            title: 'Date',
+            gridlines: {color: '#f6f6f6'},
+            baselineColor: '#ccc'
+        },
+        vAxis: {
+            title: '',
+            gridlines: {color: '#f6f6f6'}
+        },
+        colors: ['#81C9E8', '#81E9A8'],
+        legend: {'position' : 'none'},
+        top:0,
+        chartArea: {width : '1120', left:'50'}
+    };
+    
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Time of Day');
+    data.addColumn('number', '');
+    
+    data.addRows(cdata);  
+      
+    var chart = new google.visualization.AreaChart(
+    document.getElementById('chart_div'));
+    chart.draw(data, options);
+}
+
+function loadIngestionData(type) {
+    $('#ingestiondata_all').removeClass('tactive2');
+    $('#ingestiondata_bulk').removeClass('tactive2');
+    $('#ingestiondata_stream').removeClass('tactive2');
+    $('#ingestiondata_'+type).addClass('tactive2');
+    $.getJSON('/getDataIngestionChartData?channel=<%= channelId %>&type='+type, function(data) {
+        var cdata = [];
+        data.forEach(function(cd) { 
+            cdata.push([new Date("'"+cd[0]+"'"), cd[1]]);
+        })    
+        drawDataIngestionChart(cdata);
+    });    
+}
+</script>
+<% include footer.ejs %>

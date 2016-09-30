@@ -1,0 +1,130 @@
+<% include header.ejs %>
+<% include innerheader.ejs %>
+
+<div style='margin:10px auto; width:1210px;  padding:0px 0px 30px 0px; min-height:1000px;'>
+    
+    <div style='padding:0 10px;'>
+        <div style='padding:0px 0 0px 0; margin-top:30px; border-bottom:1px solid #eee;'>
+            
+            <div style='margin-top:15px; border-bottom:0px solid #eee; float:left'>
+                <div style='float:left;'><a href='/attributeCoverage?id=<%= channelId %>' class='tmenu'>Attribute Coverage</a></div>
+                <div style='float:left; margin-left:30px;'><a href='/viewData?id=<%= channelId %>'  class='tmenu tactive'>Individual Item Data</a></div>
+                <div class='clr'></div>
+            </div>
+            
+            <div class='clr'></div>
+
+        </div>
+    
+        <div style='margin-top:20px; margin-left:0px; background:#F9F9F9; padding:20px 50px'>
+            <div style='float:left; margin-top:2px; margin-left:200px;'>
+                <input type='text' class='ibox' id='itemId' value='<% if(itemId) { %><%= itemId %><% } else { %>Enter Item Id<% } %>' onfocus="if(this.value == 'Enter Item Id') { this.value=''; } " onblur="if(this.value == '') { this.value='Enter Item Id'; } " style="width:600px;" />
+            </div>
+            
+            <div style='float:left; margin:17px 0 0 30px'>
+                <a href='#' onclick="getData(); return false;" class='bluebutton' style='line-height:32px;'>Go</a>
+            </div>
+            
+            <div style='float:right; margin:0px 0 0 30px; display:none;' id='loader'>
+                <img src='images/loaderbg.gif' />
+            </div>
+            
+            <div class='clr'></div> 
+        </div>
+    
+        <div style="border-bottom:1px solid #eee; padding:0px 0 15px 0; margin-top:30px;">
+            <div style="margin-top:8px; float:left;">
+                <h1 style="font-size:18px; color:#555;">Content Attributes</h1>
+            </div>
+            <div class="clr"></div>
+        </div>
+    
+        <div style='margin-top:30px; font-size:15px; color:#333;'>
+        <% if(Object.keys(contentData).length > 0) { %>    
+            <% for (var key in contentData) { %>
+                <% if (key != 'channelId' && key != 'itemId') { %>
+                    <div style='padding:15px 0; border-bottom:1px solid #f6f6f6;'>
+                    <div style='float:left; width:200px;'><%= attributeResults[key]['name'] %>:</div>
+                    <div style='float:left;'><%= contentData[key] %></div>
+                    <div style='clear:both'></div>
+                    </div>
+                <% } %>    
+            <% } %>
+        <% } else { %>
+            <div style='font-size:20px; text-align:center; color:#ccc'>
+                Not Provided
+            </div>
+        <% } %>
+        </div>
+        
+        <div style="border-bottom:1px solid #eee; padding:0px 0 15px 0; margin-top:30px;">
+            <div style="margin-top:8px; float:left;">
+                <h1 style="font-size:18px; color:#555;">Interactions</h1>
+            </div>
+            <div class="clr"></div>
+        </div>
+        
+        <div id="chart_div" style='height:300px;'>
+            <% if(chartData.length == 0) { %>
+                <div style='font-size:20px; text-align:center; color:#ccc; margin-top:30px;'>
+                    Not Provided
+                </div>
+            <% } %>
+        </div>
+        
+    </div>
+</div>    
+
+<script>
+    function getData() {
+        itemId = $('#itemId').val();
+        if (itemId) {
+            window.location = '/viewData?id=<%= channelId %>&item='+itemId;
+        }
+    }
+    
+    google.load('visualization', '1', {packages: ['corechart', 'bar']});
+    google.setOnLoadCallback(drawMultSeries);
+    
+    function drawMultSeries() {
+    
+        <% if(chartData.length > 0) { %>
+            var cdata = [];
+            <% chartData.forEach(function(cd) { %>
+                cdata.push([new Date('<%= cd[0] %>'), <%= cd[1] %>]);
+            <% }); %>    
+            drawDataIngestionChart(cdata);
+        <% } %>
+    }
+    
+    function drawDataIngestionChart(cdata) {
+        var options = {
+            title: '',
+            hAxis: {
+                title: 'Date',
+                gridlines: {color: '#f6f6f6'},
+                baselineColor: '#ccc'
+            },
+            vAxis: {
+                title: '',
+                gridlines: {color: '#f6f6f6'}
+            },
+            colors: ['#81C9E8', '#81E9A8'],
+            legend: {'position' : 'none'},
+            top:0,
+            chartArea: {width : '1120', left:'50'}
+        };
+        
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Time of Day');
+        data.addColumn('number', '');
+        
+        data.addRows(cdata);  
+          
+        var chart = new google.visualization.AreaChart(
+        document.getElementById('chart_div'));
+        chart.draw(data, options);
+    }
+</script>
+
+<% include footer.ejs %>

@@ -1,0 +1,108 @@
+<% include header.ejs %>
+<% include innerheader.ejs %>
+
+<div style='margin:10px auto; width:1210px;  padding:0px 0px 30px 0px; min-height:1000px;'>
+    <div style='padding:0 10px;'>
+        <div style='border-bottom:1px solid #eee; padding:0px 0 15px 0; margin-top:30px;'>
+            <div style='margin-top:0px; float:left;'>
+                <h1 style='padding-top:10px;' id='attributePageHeading'>Content Based Attributes</h1>
+            </div>
+            <div style='float:right; border: 0px solid #ddd; padding-top:10px;' id='addAttributeButtonContainer'>
+                <% if(Object.keys(attributeResults).length > 0) { %>
+                <a href='#' onclick='openAddNewAttributeForm(); return false;' class='bluebutton' style='line-height:32px;'>Add New Attribute</a>
+                <% } %>
+            </div>
+            <div class='clr'></div>
+        </div>
+        
+        <div id='attributeList' style='display:block;'>
+            
+        <% if(Object.keys(attributeResults).length > 0) { %>    
+        
+        <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin-top:25px;' class='algoListTable'>
+            <tr>
+                <th width='450'>Name</th>
+                <th width='250'>Key</th>
+                <th width='300'>Type</th>
+                <th>Delete</th>
+            </tr>
+            <% for (attributeId in attributeResults) { %>
+                <tr>
+                    <td style='font-size:16px;'><%= attributeResults[attributeId]['name'] %></td>
+                    <td style='font-size:16px;'><%= attributeResults[attributeId]['key'] %></td>
+                    <td style='font-size:16px;'><%= attributeResults[attributeId]['type'] %></td>
+                    <td><a href='/deleteAttribute?id=<%= attributeId %>&channel=<%= channelId %>'><img src='images/trash.png' /></a> </td>
+                </tr>
+            <% } %>
+        </table>
+        <% } else { %>
+        <div style='background:#f8f8f8; margin-top:30px; padding:70px 0; text-align:center; font-size:30px; font-family:"Open Sans"; font-weight:300; color:#999'>
+            You have not added any attrubute yet.
+            <div style='margin-top:30px;'>
+                <a href='#' onclick='openAddNewAttributeForm(); return false;' class='bluebutton' style='line-height:32px;'>Add New Attribute</a>
+            </div>
+        </div>
+        <% } %>
+        </div>
+        
+        <div id='addNewAttribute' style='display:none;'>
+        <form method='POST' action='/addContentBasedAttribute' id='addAttributeForm'>
+            <!--div style='margin-top:20px; background:#f9f9f9; padding:20px 50px 40px 50px;'-->
+            <div>
+                <div style='margin-top:40px;'>    
+                    <div style='float:left; width:300px; text-align: right; font-size:16px; color:#444; padding-top:10px;'>Name:</div>
+                    <div style='float:left; margin-left: 30px;'>
+                        <input type='text' name='attribute_name' value='' id='attribute_name' class='inputboxlarge' />
+                    </div>
+                    <div class='clr' style="margin-top:30px;"></div>
+                    
+                    <div style='float:left; width:300px; text-align: right; font-size:16px; color:#444; padding-top:10px;'>Key:</div>
+                    <div style='float:left; margin-left: 30px;'>
+                        <input type='text' name='attribute_key' value='' id='attribute_key' class='inputboxlarge' />
+                    </div>
+                    <div class='clr' style="margin-top:30px;"></div>
+                    
+                    <div style='float:left; width:300px; text-align: right; font-size:16px; color:#444; padding-top:10px;'>Type:</div>
+                    <a href='#' class='cba_type cba_type_active' id='atype_n' onclick="$('#attribute_type_n').attr('checked', 'checked'); $('#atype_n').addClass('cba_type_active'); $('#atype_c').removeClass('cba_type_active');">
+                        <input type='radio' name='attribute_type' id='attribute_type_n' value='numeric' checked='checked' />
+                        Numeric
+                    </a>
+                    
+                    <a href='#' class='cba_type' id='atype_c' onclick="$('#attribute_type_c').attr('checked', 'checked'); $('#atype_c').addClass('cba_type_active'); $('#atype_n').removeClass('cba_type_active');">
+                        <input type='radio' name='attribute_type' id='attribute_type_c' value='categorical' />
+                        Categorical
+                    </a>
+                    
+                    <div class='clr' style="margin-top:30px;"></div>
+                    
+                    <div style='float:left; width:300px; text-align: right; font-size:18px; color:#444; padding-top:10px;'>&nbsp;</div>
+                    <div style='float:left; margin-left: 30px;'>
+                        <a href='#' onclick="document.getElementById('addAttributeForm').submit();" class='zbutton zsmall zwhite'>Submit</a>
+                    </div>
+                    <div style='float:left; margin-left: 30px; margin-top:8px;'>
+                        <a href='#' onclick="cancelNewAttributeForm(); return false;">Cancel</a>
+                    </div>
+                    <div class='clr' style="margin-top:30px;"></div>
+                </div>    
+            </div>
+            <input type='hidden' name='channelId' value='<%= channelId %>' />
+        </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAddNewAttributeForm() {
+        $('#attributeList').hide();
+        $('#addNewAttribute').show();
+        $('#attributePageHeading').html('Add New Attribute');
+        $('#addAttributeButtonContainer').hide();
+    }
+    function cancelNewAttributeForm() {
+        $('#attributeList').show();
+        $('#addNewAttribute').hide();
+        $('#attributePageHeading').html('Content Based Attributes');
+        $('#addAttributeButtonContainer').show();
+    }
+</script>
+<% include footer.ejs %>

@@ -1,0 +1,179 @@
+<% if (!statusCheck) { %>
+<% include header.ejs %>
+<% include innerheader.ejs %>
+
+<div style='margin:10px auto; width:1210px;  padding:0px 0px 30px 0px; min-height:1000px;'>
+    <div style='padding:0 10px;'>
+        <div style='border-bottom:1px solid #eee; padding:0px 0 15px 0; margin-top:30px;'>
+            <div style='margin-top:0px; float:left;'>
+                <h1 style='padding-top:10px;'>Jobs <img src='images/fb_ajax_loader.gif' style='margin-left:10px; display:none' id='jobloader' /></h1>
+            </div>
+            <div style='float:right; border: 0px solid #ddd; padding-top:10px;'>
+                <% if (typeof(algoResults) != 'undefined' && Object.keys(algoResults).length > 0) { %>
+                <a href='#' onclick='runAll(); return false;' class='greenbutton' style='line-height:32px;'>Run All</a>
+                <% } %>
+            </div>
+            <div class='clr'></div>
+        </div>
+        
+        <div id='algoList'>
+<% } %>
+
+        <% if(Object.keys(algoResults).length > 0) { %>    
+       
+        <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin-top:20px;' class='algoListTable'>
+            <tr>
+                <th width='400'>Name</th>
+                <th width='200'>Last successful run</th>
+                <th width='150'>Last run</th>
+                <th width='120'>Job History</th>
+                <th>Run</th>
+            </tr>
+            <% for (algoId in algoResults) { %>
+                <tr>
+                    <td style='font-size:16px;' valign='top'><a href='/jobHistory?id=<%= algoId %>&channel=<%= channelId %>' style='font-size:16px;'><%= algoResults[algoId]['name'] %></a>
+                    <div style='font-size:14px; color:#888; margin-top:6px;'><%= algoMasterList[algoResults[algoId]['base']] %></div></td>
+                    <td style='font-size:16px;'  valign='top'>
+                        <%
+                            if (algoResults[algoId]['lastrun']) {
+                                var timeNow = (new Date).getTime();
+                                var timeSince = timeNow - algoResults[algoId]['lastrun'];
+                                var timeSinceDisplay = parseInt(timeSince/(1000*60))
+                                var timeSinceDisplayUnit = 'min'
+                                if (timeSince > 3600000) {
+                                    timeSinceDisplay = parseInt(timeSince/(1000*60*60))
+                                    timeSinceDisplayUnit = 'hrs'
+                                }
+                                if (timeSince < 60000) {
+                                    timeSinceDisplay = parseInt(timeSince/(1000))
+                                    timeSinceDisplayUnit = 'secs'
+                                }
+                        %>
+                            <%= timeSinceDisplay %> <%= timeSinceDisplayUnit %> ago
+                        <%
+                            if (algoResults[algoId]['laststart']) {
+                                var timeTook = algoResults[algoId]['lastrun'] - algoResults[algoId]['laststart'];
+                                
+                                var timeTookDisplay = parseInt(timeTook/(1000*60))
+                                console.log(timeTookDisplay);
+                                var timeTookDisplayUnit = 'mins'
+                                if (timeTook > 3600000) {
+                                    timeTookDisplay = parseInt(timeTook/(1000*60*60))
+                                    timeTookDisplayUnit = 'hrs'
+                                }
+                                if (timeTook < 60000) {
+                                    timeTookDisplay = parseInt(timeTook/(1000))
+                                    timeTookDisplayUnit = 'secs'
+                                }
+                        %>
+                            <div style='font-size:12px; color:#888; margin-top:6px;'>Took <%= timeTookDisplay %> <%= timeTookDisplayUnit %></div>
+                        <% } } else { %>
+                            Never
+                        <% } %>
+                    </td>
+                    <td valign='top'>
+                        <% if (algoResults[algoId]['lastoutcome']) {
+                            if(algoResults[algoId]['lastoutcome'] == 'success') {
+                        %>
+                            <img src='images/ok.png' />    
+                        <% } else { %>
+                            <img src='images/error.png' />
+                        <%    
+                            var timeNow = (new Date).getTime();
+                            var timeLastRun = timeNow - algoResults[algoId]['jobstart'];
+                            var timeLastRunDisplay = parseInt(timeLastRun/(1000*60))
+                            var timeLastRunDisplayUnit = 'min'
+                            if (timeLastRun > 3600000) {
+                                timeLastRunDisplay = parseInt(timeLastRun/(1000*60*60))
+                                timeLastRunDisplayUnit = 'hrs'
+                            }
+                            if (timeLastRun < 60000) {
+                                timeLastRunDisplay = parseInt(timeLastRun/(1000))
+                                timeLastRunDisplayUnit = 'secs'
+                            }      
+                        %>
+                            <div style='font-size:12px; color:#888; margin-top:6px;'>
+                                <%= timeLastRunDisplay %> <%= timeLastRunDisplayUnit %> ago
+                            </div>
+                        <% } } else { %>
+                            NA
+                        <% } %>
+                    </td>
+                    <td valign='top'><a href='/jobHistory?id=<%= algoId %>&channel=<%= channelId %>'><img src='images/history.png' /></a></td>
+                    <td valign='top'>
+                        <%
+                            if (algoResults[algoId]['status'] && algoResults[algoId]['status'] == 'running') {
+                                var timeNow = (new Date).getTime();
+                                var timeSince = timeNow - algoResults[algoId]['jobstart'];
+                                var timeSinceDisplay = parseInt(timeSince/(1000*60))
+                                var timeSinceDisplayUnit = 'mins'
+                                if (timeSince > 3600000) {
+                                    timeSinceDisplay = parseInt(timeSince/(1000*60*60))
+                                    timeSinceDisplayUnit = 'hrs'
+                                }
+                                if (timeSince < 60000) {
+                                    timeSinceDisplay = parseInt(timeSince/(1000))
+                                    timeSinceDisplayUnit = 'secs'
+                                }
+                        %>
+                            <div style='float:left'>
+                                <a href='#' onclick='return false;' class='graybutton' style='line-height:32px;'>Running &nbsp;&nbsp;<img src='images/ajaxload.gif' /></a>
+                            </div>
+                            <div style='float:left; font-size:11px; margin:11px 0 0 15px; color:#888'>
+                                For <%= timeSinceDisplay %> <%= timeSinceDisplayUnit %>
+                            </div>
+                        <% } else if(algoResults[algoId]['status'] == 'queued') { %>
+                            <a href='#' onclick='runJob("<%= algoId %>"); return false;' class='graybutton' style='line-height:32px;'>Queued</a>
+                        <% } else { %>
+                            <a href='#' onclick='runJob("<%= algoId %>"); return false;' class='bluebutton' style='line-height:32px;'>Run</a>
+                        <% } %>
+                    </td>
+                </tr>
+            <% } %>
+        </table>
+        <% } else { %>
+        <div style='background:#f8f8f8; margin-top:30px; padding:70px 0; text-align:center; font-size:30px; font-family:"Open Sans"; font-weight:300; color:#999'>
+            You have not added any algo yet.
+            
+        </div>
+        <% } %>
+
+<% if (!statusCheck) { %>
+        </div>
+    </div>
+</div>    
+<script>
+    function openAddNewAlgoForm() {
+        $('#algoList').hide();
+        $('#addNewAlgo').show();
+    }
+    function cancelNewAlgoForm() {
+        $('#algoList').show();
+        $('#addNewAlgo').hide();
+    }
+    $(document).ready(function() {
+        var refreshId = setInterval( refreshJobs, 5000);    
+    });
+    function refreshJobs() {
+        $('#jobloader').show();
+        $.getJSON('/jobs?id=<%= channelId %>&statusCheck=1&r='+Math.random(), function(data) {
+            $('#algoList').html(data.response);
+            $('#jobloader').hide();
+        })
+    }
+    function runJob(algoId) {
+        console.log(algoId)
+        $.getJSON('/runJob?id='+algoId+'&r='+Math.random(), function(data) {
+            refreshJobs();
+        })    
+    }
+    function runAll() {
+        <% if(Object.keys(algoResults).length > 0) { %>
+        <% for (algoId in algoResults) { %>
+            runJob('<%= algoId %>');
+        <% } %>
+        <% } %>
+    }
+</script>
+<% include footer.ejs %>
+<% } %>

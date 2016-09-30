@@ -1,0 +1,195 @@
+<% include header.ejs %>
+<% include innerheader.ejs %>
+
+<div style='margin:10px auto; width:1210px;  padding:0px 0px 30px 0px; min-height:1000px;'>
+    <div style='padding:0 10px;'>
+        <div style='border-bottom:1px solid #eee; padding:0px 0 15px 0; margin-top:30px;'>
+            <div style='margin-top:0px; float:left;'>
+                <h1 style='padding-top:10px;' id='algoPageHeading'>Algos</h1>
+            </div>
+            <div style='float:right; border: 0px solid #ddd; padding-top:10px;' id='addAlgoButtonContainer'>
+                <% if(Object.keys(algoResults).length > 0) { %>
+                <a href='#' onclick='openAddNewAlgoForm(); return false;' class='bluebutton' style='line-height:32px;'>Add New Algo</a>
+                <% } %>
+            </div>
+            <div class='clr'></div>
+        </div>
+        
+        
+        <div id='algoList' style='display:block;'>
+            
+        <% if(Object.keys(algoResults).length > 0) { %>    
+        <table border='0' cellpadding='0' cellspacing='0' width='100%' style='margin-top:25px;' class='algoListTable'>
+            <tr>
+                <th width='300'>Name</th>
+                <th width='250'>Base algo</th>
+                <th width='200'>Actions considered</th>
+                <th width='250'>Replace missing values with</th>
+                <th>Delete</th>
+            </tr>
+            <% for (algoId in algoResults) { %>
+                <tr>
+                    <td style='font-size:16px;'><%= algoResults[algoId]['name'] %></td>
+                    <td style='font-size:16px;'><%= algoMasterList[algoResults[algoId]['base']] %></td>
+                    <td style='font-size:16px;'>
+                        <%
+                            var actions = JSON.parse(algoResults[algoId]['actions'])
+                            if (actions.length > 0) {
+                        %>
+                            <%= actions.join(', ') %>
+                        <% } else { %>
+                            All
+                        <% } %>
+                    </td>
+                    <td style='font-size:16px;'>
+                        <% if (typeof(algoResults[algoId]['missingValues']) != 'undefined' && algoResults[algoId]['missingValues']) { %>
+                        <%= algoResults[algoId]['missingValues'] %></td>
+                        <% } %>
+                    <td><a href='/deleteAlgo?id=<%= algoId %>'><img src='images/trash.png' /></a> </td>
+                </tr>
+            <% } %>
+        </table>
+        <% } else { %>
+        <div style='background:#f8f8f8; margin-top:30px; padding:70px 0; text-align:center; font-size:30px; font-family:"Open Sans"; font-weight:300; color:#999'>
+            You have not added any algo yet.
+            <div style='margin-top:30px;'>
+                <a href='#' onclick='openAddNewAlgoForm(); return false;' class='bluebutton' style='line-height:32px;'>Add New Algo</a>
+            </div>
+        </div>
+        <% } %>
+        </div>
+        
+        <div id='addNewAlgo' style='display:none;'>
+        <form method='POST' action='/addAlgo' id='addAlgoForm'>
+            <!--div style='margin-top:20px; background:#f9f9f9; padding:20px 50px 40px 50px;'-->
+            <div>
+                
+                <div style='margin-top:40px;'>    
+                    <div style='float:left; width:300px; text-align: right; font-size:16px; color:#444; padding-top:10px;'>Name:</div>
+                    <div style='float:left; margin-left: 30px;'>
+                        <input type='text' name='algo_name' value='' id='algo_name' class='inputboxlarge' />
+                    </div>
+                    <div class='clr' style="margin-top:30px;"></div>
+                    
+                    <div style='float:left; width:300px; text-align: right; font-size:16px; color:#444; padding-top:10px;'>Base Algo:</div>
+                    <div style='float:left; margin-left: 30px;'>
+                        
+                        <a class='sbox' href='#' data-jq-dropdown="#jq-dropdown-1" id='algobox' style='margin:0;'>
+                            <div style='float:right; margin-left:7px;'>
+                                <img src='images/down.png' />
+                            </div>
+                            <span id='selectedalgotext'>Select</span>
+                        </a>
+                    </div>
+                    <div class='clr' style="margin-top:30px;"></div>
+                    
+                    <div style='float:left; width:300px; text-align: right; font-size:16px; color:#444; padding-top:10px;'>Actions:</div>
+                    <div style='float:left; margin-left: 30px;'>
+                        <input type='text' name='actions' value='' id='actions' class='inputboxlarge' /><br />
+                        <span style='font-size:12px; color:#888; line-height:250%;'>Comma-separated (without any spaces) list of actions to consider for this algo</span>
+                    </div>
+                    <div class='clr' style="margin-top:30px;"></div>
+                    
+                    <div style='float:left; width:300px; text-align: right; font-size:16px; color:#444; padding-top:10px;'>Replace Missing Values With:</div>
+                    <div style='float:left; margin-left: 30px;'>
+                        <a class='sbox' href='#' data-jq-dropdown="#jq-dropdown-2" id='missingvaluebox' style='margin:0;'>
+                            <div style='float:right; margin-left:7px;'>
+                                <img src='images/down.png' />
+                            </div>
+                            <span id='selectedmissingvaluetext'>Select</span>
+                        </a>
+                    </div>
+                    <div class='clr' style="margin-top:30px;"></div>
+                    
+                    
+                    <div style='float:left; width:300px; text-align: right; font-size:18px; color:#444; padding-top:10px;'>&nbsp;</div>
+                    <div style='float:left; margin-left: 30px;'>
+                        <a href='#' onclick="document.getElementById('addAlgoForm').submit();" class='zbutton zsmall zwhite'>Submit</a>
+                    </div>
+                    <div style='float:left; margin-left: 30px; margin-top:8px;'>
+                        <a href='#' onclick="cancelNewAlgoForm(); return false;">Cancel</a>
+                    </div>
+                    <div class='clr' style="margin-top:30px;"></div>
+                </div>    
+            </div>
+            <input type='hidden' name='channelId' value='<%= channelId %>' />
+            
+            <div id="jq-dropdown-1" class="jq-dropdown jq-dropdown-tip">
+                <div class="jq-dropdown-panel" style='max-width:700px !important;' id='bigmenu'>
+                    <% acount = 1; for (algoType in algoListCategorised) { %>
+                    <% numAlgos = Object.keys(algoListCategorised[algoType]).length; %>
+                    <ul class="jq-dropdown-menu" style='float:left; border:none; box-shadow:none; margin-right:20px; width:300px;'>
+                        <li style='font-size:16px; font-family:"Open Sans"; font-weight:600; border:none; margin-bottom:10px; color:#333;'><%= algoType %></li>
+                    <% for (algoId in algoListCategorised[algoType]) { %>
+                        <li style='<% if(acount == numAlgos) { %>border-bottom:none;<% } %>'>
+                            <div style='float:left; width:20px; margin-top:10px; padding-left:10px;'>
+                                <input type='radio' id='cb<%= acount %>' value='<%= algoListCategorised[algoType][algoId] %>' class='cbalgos' name='base_algo' onclick="selectAlgo('<%= algoMasterList[algoListCategorised[algoType][algoId]] %>')" />
+                            </div>
+                            <label for='cb<%= acount %>' style='display:block; padding-left:40px;'><%= algoMasterList[algoListCategorised[algoType][algoId]] %></label>
+                            <div class='clr'></div>
+                        </li>
+                    <% acount++; } %>
+                    </ul>
+                    <% } %>
+                    <div class='clr'></div>
+                </div>    
+            </div> 
+            
+            <div id="jq-dropdown-2" class="jq-dropdown jq-dropdown-tip">
+                <div class="jq-dropdown-panel" style='max-width:700px !important;' id='bigmenu'>
+                    <ul class="jq-dropdown-menu" style='padding:2px; border:none; box-shadow:none; margin-right:20px; width:150px;'>
+                        <li>
+                            <div style='float:left; width:20px; margin-top:10px; padding-left:10px;'>
+                                <input type='radio' id='mcb_zero' value='zero' class='cbalgos' name='missing_values' onclick="selectMissingValue('Zero')" />
+                            </div>
+                            <label for='mcb_zero' style='display:block; padding-left:40px;'>Zero</label>
+                            <div class='clr'></div>
+                        </li>
+                        
+                        <li>
+                            <div style='float:left; width:20px; margin-top:10px; padding-left:10px;'>
+                                <input type='radio' id='mcb_mean' value='mean' class='cbalgos' name='missing_values' onclick="selectMissingValue('Mean')" />
+                            </div>
+                            <label for='mcb_mean' style='display:block; padding-left:40px;'>Mean</label>
+                            <div class='clr'></div>
+                        </li>
+                        
+                        <li style='border:none'>
+                            <div style='float:left; width:20px; margin-top:10px; padding-left:10px;'>
+                                <input type='radio' id='mcb_median' value='median' class='cbalgos' name='missing_values' onclick="selectMissingValue('Median')" />
+                            </div>
+                            <label for='mcb_median' style='display:block; padding-left:40px;'>Median</label>
+                            <div class='clr'></div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+        </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAddNewAlgoForm() {
+        $('#algoList').hide();
+        $('#addNewAlgo').show();
+        $('#algoPageHeading').html('Add New Algo');
+        $('#addAlgoButtonContainer').hide();
+    }
+    function cancelNewAlgoForm() {
+        $('#algoList').show();
+        $('#addNewAlgo').hide();
+        $('#algoPageHeading').html('Algos');
+        $('#addAlgoButtonContainer').show();
+    }
+    function selectAlgo(algoname) {
+        $('#selectedalgotext').text('('+algoname+')');
+        $('#algobox').jqDropdown('hide');
+    }
+    function selectMissingValue(methodname) {
+        $('#selectedmissingvaluetext').text('('+methodname+')');
+        $('#missingvaluebox').jqDropdown('hide');
+    }
+</script>
+<% include footer.ejs %>

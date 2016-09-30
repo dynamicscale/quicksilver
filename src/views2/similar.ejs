@@ -1,0 +1,22 @@
+<% algos.forEach(function(algo) { %>
+<div style='float:left; width:300px; margin-right:50px'>
+    <h1 style='font-size:16px;'><%= algoList[algo] %> Similar Items</h1>
+    <div id='history2' style='padding-top:20px;'>
+        <table border='0' cellpadding='0' cellspacing='0' width='100%'>
+            <tbody>
+                <tr>
+                    <th>Item</th>
+                    <th>Score</th>
+                </tr>
+                <% similarItems[algo].forEach(function(rdata) { %>
+                    <tr>
+                        <td><%= rdata[0] %></td>
+                        <td><%= rdata[1] %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+<% }) %>
+<div class='clr'></div>

@@ -1,0 +1,144 @@
+<% include header.ejs %>
+
+<%- include gtop.ejs %>
+
+<div style='width:800px; margin:30px auto;'>
+    <!--h2 style='text-align:center; padding:8px 0 0 0px; font-size:18px; font-weight:700; color:#333; font-family:"Open Sans"; letter-spacing: -1px;'>QuickSilver<div class='clr'></div>
+    </h2-->
+    
+    <div id='pageHeading' style='text-align:center; font-size:40px; font-weight:400; margin-top:15px; color:#666; font-family:"Open Sans", arial'>Select Your Channel</div>
+        
+    <div style='border-top:0px solid #eee; margin-top:15px; padding-top:20px;'>
+            
+        <div style='width:700px; box-shadow:0px 0px 5px #ccc; padding:15px 50px' id='channellist' class="scrollbar-inner">
+            
+            <div id='addNewChannelFormDiv' style='display:none; margin-left:50px;'>
+            <form method='POST' action='/saveChannel' id='addChannelForm'>
+            <div style='margin-top:20px;'>
+                <div style='font-size:16px; color:#444; padding-top:8px;'>Channel Name:</div>
+                <div style='margin-top: 10px;'>
+                    <input type='text' name='channel_name' id='channel_name' class='inputboxlarge' style='width:600px;' />
+                </div>
+                <div class='clr' style="margin-top:30px;"></div>
+                
+                <div style='font-size:16px; color:#444; padding-top:8px;'>About:</div>
+                <div style='margin-top: 10px;'>
+                    <input type='text' name='channel_desc' class='inputboxlarge' style='width:600px;' />
+                </div>
+                <div class='clr' style="margin-top:30px;"></div>
+                
+                <div style='font-size:16px; color:#444; padding-top:8px;'>Client:</div>
+                
+                <div style='margin-top: 10px;'>
+                    <select name='clientId' class='inputboxlarge' style='width:600px; background:#fbfbfb; color:#777'>
+                        <option value=''>Select from existing clients</option>
+                        <%
+                            for(var clientId in clients) { 
+                            client = clients[clientId];
+                            if (typeof(client.name) != 'undefined' && client.name) {
+                        %>
+                            <option value='<%= clientId %>'><%= client.name %></option>
+                        <% } } %>
+                    </select>
+                </div>
+                
+                <div style='margin:15px 0; text-align:center; color:#777'>
+                    Or add new client
+                </div>
+                <div style='margin-top: 10px;'>
+                    <input type='text' name='clientNew' class='inputboxlarge' style='width:600px;' />
+                </div>
+                <div class='clr' style="margin-top:30px;"></div>
+                
+                <div style='float:left;'>
+                    <a href='#' onclick="document.getElementById('addChannelForm').submit();" class='zbutton zsmall zwhite'>Submit</a>
+                </div>
+                <div style='float:left; margin-left: 30px; margin-top:8px;'>
+                    <a href='#' onclick="cancelNewChannelForm(); return false;">Cancel</a>
+                </div>
+                <div class='clr'></div>
+            </div>
+            </form>        
+            </div>
+            
+            <div id='listChannelsDiv'>
+            <p>
+            <ul>
+            <% var i = 0; %>
+            <% for(var clientId in clients) { 
+                client = clients[clientId];
+                if (typeof(client.name) != 'undefined' && client.name) {
+            %>
+                <li style='margin-bottom:25px; <% if (i >= num-1) { %> border-bottom:none; <% } %>'>
+                <div style='float:left; width:300px;'>
+                    <div style='font-family: "Open Sans", arial; font-size:16px; color:#666; font-weight:bold;'>
+                        <%= client.name %>
+                    </div>
+                </div>
+                <div style='float:left; width:400px;'>
+                    <%
+                        if (typeof(client.channels) != 'undefined') {
+                    %>
+                        <div style=''>
+                    <%
+                            var k = 1;
+                            var numChannels = Object.keys(client.channels).length
+                            for(var channelId in client.channels) {
+                                channel = client.channels[channelId];
+                    %>
+                                <div style='padding-bottom:<% if (k < numChannels) { %>3<% } %>0px;'>
+                                <a href='/channel?id=<%= channelId %>' style='font-family: "Open Sans", arial; font-size:16px;'><%= channel.info.name %></a>
+                                <div style='margin-top:8px; color:#888; font-size:15px; font-family: "Open Sans", arial;'><%= channel.info.desc %></div>
+                                <% if (typeof(channel.info.created) != 'undefined') { %>
+                                    <div style='margin-top:12px; color:#888; font-size:12px; font-style: italic;'>Created on <%= moment(parseInt(channel.info.created)).format('D MMMM, YYYY') %></div>
+                                <% } %>
+                                </div>
+                    <%
+                                k++;
+                            }
+                    %>
+                        </div>
+                    <%    
+                        }
+                        else {
+                    %>
+                        <div style='font-family: "Open Sans", arial; font-size:15px; color:#888;'>No channels have been created for <%= client.name %></div>    
+                    
+                    <% } %>
+            </div>
+            <div class='clr'></div>    
+                </li>
+                <% if (i%2 == 1) { %>
+                    <div class='clr'></div>
+                <% } %>
+                
+                <% i++; %>
+            <% } } %>
+            </ul>
+            </p>
+            </div>
+        </div>
+        
+        <%- include gmenu.ejs %>
+            
+        <div class='clr'></div>
+    </div>
+<script>
+    function openNewChannelForm() {
+        $('#newChannelLink').hide();
+        $('#addNewChannelFormDiv').show();
+        $('#listChannelsDiv').hide();
+        $('#channel_name').focus();
+        $('#pageHeading').html('Add New Channel');
+    }
+    
+    function cancelNewChannelForm() {
+        $('#newChannelLink').show();
+        $('#addNewChannelFormDiv').hide();
+        $('#listChannelsDiv').show();
+        $('#pageHeading').html('Select Your Channel');
+    }
+</script>    
+</div>
+
+<% include footer.ejs %>

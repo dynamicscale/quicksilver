@@ -1,0 +1,149 @@
+<% include header.ejs %>
+<% include innerheader.ejs %>
+
+<div style='margin:10px auto; width:1210px;  padding:0px 0px 30px 0px; min-height:1000px;'>
+    <div style='padding:0 10px;'>
+        <div style='border-bottom:1px solid #eee; padding:0px 0 15px 0; margin-top:30px;'>
+            <div style='margin-top:0px; float:left;'>
+                <h1 style='padding-top:10px;'><span style='color:#08c'>Job History:</span> <%= algoResults['name'] %></h1>
+            </div>
+            
+            <div style='float:right; border: 0px solid #ddd; padding-top:15px;'>
+                <a href='/jobs?id=<%= channelId %>' class='zbutton zsmaller zwhite'>Back to Jobs</a>
+            </div>
+            
+            <div class='clr'></div>
+        </div>
+        
+        <div id='algoList'>
+        <%
+            jobHistory = algoResults['jobHistory']
+            console.log(jobHistory)
+            if(jobHistory.length > 0) {
+        %>
+                <div id='chart_div' style='height:200px; text-align:center'><img src='images/loading.gif' style='margin-top:80px' /></div>
+                <div class='clr' style='margin-top:30px;'></div>
+        <%        
+                var numHistoryItems = jobHistory.length;
+                var k = numHistoryItems;
+                jobHistory.forEach(function(history) {
+                    joutput = history[1].output
+                    joutcome = history[1].outcome
+                    if (!joutcome) {
+                        joutcome = 'NA'
+                    }
+                    
+                    var timeNow = (new Date).getTime();
+                    var timeSince = timeNow - parseInt(history[1].endTime);
+                    var timeSinceDisplay = parseInt(timeSince/(1000*60))
+                    var timeSinceDisplayUnit = 'min'
+                    if (timeSince > 3600000) {
+                        timeSinceDisplay = parseInt(timeSince/(1000*60*60))
+                        timeSinceDisplayUnit = 'hrs'
+                    }
+                    if (timeSince < 60000) {
+                        timeSinceDisplay = parseInt(timeSince/(1000))
+                        timeSinceDisplayUnit = 'secs'
+                    }
+                    
+                    var jobDuration = parseInt(history[1].endTime) - parseInt(history[1].startTime)
+                    var jobDurationDisplay = parseInt(jobDuration/(1000*60))
+                    var jobDurationDisplayUnit = 'min'
+                    if (jobDuration > 3600000) {
+                        jobDurationDisplay = parseInt(jobDuration/(1000*60*60))
+                        jobDurationDisplayUnit = 'hrs'
+                    }
+                    if (jobDuration < 60000) {
+                        jobDurationDisplay = parseInt(jobDuration/(1000))
+                        jobDurationDisplayUnit = 'secs'
+                    }
+                    
+                    var statusBG = '#DB4437'
+                    if (joutcome == 'success') {
+                        statusBG = '#03B567'
+                    }
+                    else if (joutcome == 'NA') {
+                        statusBG = '#FCA72F'
+                    }
+                    
+        %>
+            <div style='margin-bottom:30px;'>
+                
+                <div style='background:#f9f9f9; padding:0px; border-radius:4px'>
+                    
+                    <div style='float:left; font-family:"Open Sans"; color:#bbb; font-weight:400; font-size:50px; padding-left:20px; padding-right:20px; background:#f0f0f0; border-radius:4px'><%= k %></div>
+                    
+                    <div style='float:left; margin:11px 0 0 30px;'>
+                    
+                    <div style='font-family:"Open Sans"; color:#555; font-weight:400; font-size:16px'>
+                            <%= moment(parseInt(history[1].startTime)).format('D MMM, YYYY hh:mm a') %>
+                    </div>
+                    
+                    <div class='clr'></div>
+                    
+                    <div style='margin-top:5px;'>
+                        <div style='float:left; border-radius:3px; background:<%= statusBG %>; padding:3px 5px; font-size:11px; color:#fff; text-align:center;'>
+                            <%= joutcome.toUpperCase() %>
+                        </div>
+                        
+                        <div style='float:left; padding:3px 10px; color:#777; font-size:12px;'>
+                            <%= timeSinceDisplay %> <%= timeSinceDisplayUnit %> ago, Duration: <%= jobDurationDisplay %> <%= jobDurationDisplayUnit %>
+                        </div>
+                        <div class='clr'></div>
+                    </div>
+                    </div>
+                    <div class='clr'></div>
+                </div>
+                <div style='width:1200px; word-break:break-word; font-size:13px; color:#666; padding:20px 0 0 0;'><pre style='line-height:150%'><%= joutput %></pre></div>
+            </div>    
+            <% k--;  }) %>
+        <% } else { %>
+        <div style='background:#f8f8f8; margin-top:30px; padding:70px 0; text-align:center; font-size:30px; font-family:"Open Sans"; font-weight:300; color:#999'>
+            This job does not have any history yet.
+        </div>
+        <% } %>
+
+
+        </div>
+    </div>
+</div>
+<script>
+    google.load('visualization', '1', {packages: ['corechart', 'bar']});
+    google.setOnLoadCallback(drawMultSeries);
+
+function drawMultSeries() {
+    var options = {
+        title: '',
+        hAxis: {
+            title: 'Datetime',
+            gridlines: {color: '#f6f6f6'}
+        },
+        vAxis: {
+            title: 'Run Time',
+            gridlines: {color: '#f6f6f6'}
+        },
+        colors: ['#81C9E8', '#81E9A8'],
+        legend: {'position' : 'none'},
+        top:0,
+        chartArea: {width : '1080', left:'100'},
+        
+    };
+    
+    var data = new google.visualization.DataTable();
+    data.addColumn('datetime', 'Time of Day');
+    data.addColumn('number', '');
+    data.addColumn({type: 'string', role: 'style'});
+    
+    var cdata = [];
+    <% chartData.forEach(function(cd) { %>
+        cdata.push([new Date('<%= cd[0] %>'), <%= cd[1] %>, 'color: <%= cd[2] %>']);
+    <% }); %>    
+  
+    data.addRows(cdata);  
+      
+    var chart = new google.visualization.ColumnChart(
+    document.getElementById('chart_div'));
+    chart.draw(data, options);
+}
+</script>
+<% include footer.ejs %>

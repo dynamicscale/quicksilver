@@ -1,0 +1,258 @@
+<% include header.ejs %>
+
+<!--div class='midbar'>
+    <div style='margin:0 auto; width:1200px; padding:130px 0 23px 0;'>
+        <h3><span style='color:#eee; font-weight:normal;'>Channel:</span> <%= channelData.info.name %></h3>
+        <div class='clr'></div>
+    </div>
+</div-->
+
+<div class='topbar'>
+    <div style='margin:0 auto; width:1200px;'>
+        <!--a href='/' class='logolink'><img src='images/logoicon.png' height='30' /></a-->
+        <% if (typeof(selectedClient) != 'undefined') { %>
+            <div style='float:left;'>
+                <div class='clientmenu'><%= selectedClient.name %>:  <%= channelData.info.name %></div>
+            </div>
+        <% } %>    
+    </div>    
+</div>
+
+<div class='vlinkbox'>
+    
+    <!--div style='margin:0 auto; width:1200px; padding:13px 0 23px 0;'>
+        <h3 style='color:#333;'><span style='color:#777; font-weight:normal; display:none;'>Channel:</span><%= channelData.info.name %></h3>
+        <div class='clr'></div>
+    </div-->
+    
+<ul class='vlink'>
+    <li><a href='/channel?id=<%= channelId %>'>Dashboard</a></li>
+    <li><a href='/bulkUploads?id=<%= channelId %>'>Bulk Uploads</a></li>
+    <li><a href='/channelSettings?id=<%= channelId %>'>Settings</a></li>
+    <li><a href='/testAPI?id=<%= channelId %>' class='active'>Test APIs</a></li>
+    <div class='clr'></div>
+</ul>
+</div>
+
+<div style='margin:10px auto; width:1210px;  padding:0px 0px 30px 0px; min-height:1000px;'>
+    
+    <div style='padding:0 10px;'>
+        <div style=' padding:0px 0 0px 0; margin-top:30px;'>
+                <h1>API Playground</h1>
+                <div class='clr'></div>
+                
+                <div style='margin-top:15px; border-bottom:1px solid #eee;'>
+                    <div style='float:left;'><a href='/testAPI?id=<%= channelId %>' class='tmenu<% if(rtype == 'user') { %> tactive<% } %>'>User Recommendations</a></div>
+                    <div style='float:left; margin-left:30px;'><a href='/testAPI?id=<%= channelId %>&type=item'  class='tmenu<% if(rtype == 'item') { %> tactive<% } %>'>Similar Items</a></div>
+                    <div class='clr'></div>
+                </div>
+        </div>
+        
+        <div style='margin-top:20px; margin-left:0px; background:#F9F9F9; padding:20px 50px'>
+            <div style='float:left; margin-top:2px;'>
+                <% if(rtype == 'item') { %>
+                    <input type='text' class='ibox' id='itemId' value='266' onfocus="if(this.value == 'Enter Item Id') { this.value=''; } " onblur="if(this.value == '') { this.value='Enter Item Id'; } " />
+                <% } else { %>
+                    <input type='text' class='ibox' id='userId' value='10000101' onfocus="if(this.value == 'Enter User Id') { this.value=''; } " onblur="if(this.value == '') { this.value='Enter User Id'; } " />
+                <% } %>
+            </div>
+            
+            <a class='sbox' href='#' data-jq-dropdown="#jq-dropdown-1" id='algobox'>
+                <div style='float:right; margin-left:7px;'>
+                    <img src='images/down.png' />
+                </div>
+                Algo <span id='selectedalgotext'>(<%= algos[defaultAlgo] %>)</span>
+            </a>
+            
+            <a class='sbox' href='#' data-jq-dropdown="#jq-dropdown-2" id='numbox'>
+                <div style='float:right; margin-left:7px;'>
+                    <img src='images/down.png' />
+                </div>
+                Num <span id='selectednumtext'>(<%= defaultNum %>)</span>
+            </a>
+            
+            <div style='float:left; margin:17px 0 0 30px'>
+                <a href='#' onclick="getRecommendations('<%= rtype %>', false); return false;" class='bluebutton' style='line-height:32px;'>Go</a>
+            </div>
+            
+            <div style='float:right; margin:0px 0 0 30px; display:none;' id='loader'>
+                <img src='images/loaderbg.gif' />
+            </div>
+            
+            <div class='clr'></div>
+    
+        </div>
+        
+        <div style='margin-top:30px; display:none;' id='recoresponse'>
+            
+            <div style='float:right; margin-right:5px; display:none; margin-top:5px;' id='showUserHistoryLink'>
+                <a href='#' onclick="getRecommendations('<%= rtype %>', true); return false;">Show user history</a>
+            </div>
+            
+            <div style='display:none' id='resultHeadingBox'>
+                <h1 style='font-size:16px; margin-bottom:15px; color:#666;' id='resultHeading'></h1>
+            </div>
+            
+            <div class='clr'></div>
+            
+            <table border='0' cellpadding='0' cellspacing='0' width='100%' class='apiresponse'>
+                <tr>
+                    <td colspan='2' class='aright'><a href='' target='_blank' id='resultAPI'></a></td>
+                </tr>
+                <tr>
+                    <td class='bleft' valign='top' width='200'>Response
+                    <div style='margin-top:20px; font-size:12px; line-height:200%; color:#777; font-family:arial; font-weight:normal;' id='responseHelp'>
+                        item = Id of similar item<br />
+                        score = Similarity score
+                    </div>
+                    </td>
+                    <td class='bright' id='APIResponse'></td>
+                </tr>
+            </table>
+        </div>
+        
+    <div id="jq-dropdown-1" class="jq-dropdown jq-dropdown-tip">
+        <ul class="jq-dropdown-menu">
+            <li style='font-size:18px; color:#777; padding:15px 10px'>Item-based Collaborative Filtering</li>
+            <% numAlgos = Object.keys(algos).length; acount = 1; %>
+            <% for (algoId in algos) { %>
+                <li style='<% if(acount == numAlgos) { %>border-bottom:none;<% } %>'>
+                    <div style='float:left; width:20px; margin-top:10px; padding-left:10px;'><input type='radio' id='cb<%= acount %>' value='<%= algoId %>' class='cbalgos' name='ralgo' <% if(algoId == defaultAlgo) { %>checked='checked'<% } %>  onclick="selectAlgo('<%= algos[algoId] %>')" /></div>
+                    <label for='cb<%= acount %>' style='display:block; padding-left:40px;'><%= algos[algoId] %></label>
+                    <div class='clr'></div>
+                </li>
+            <% acount++; } %>
+        </ul>
+    </div> 
+    
+    <% var nums = [10, 20, 50, 100]; %>
+    <div id="jq-dropdown-2" class="jq-dropdown jq-dropdown-tip">
+        <ul class="jq-dropdown-menu">
+            <% acount = 1; %>
+            <% for (j in nums) { num = nums[j]; %>
+                <li style='<% if(acount == nums.length) { %>border-bottom:none;<% } %>'>
+                    <div style='float:left; width:20px; margin-top:10px;'><input type='radio' id='numcb<%= acount %>' value='<%= num %>' class='cbnums' name='rnum' <% if(num == defaultNum) { %>checked='checked'<% } %> onclick="selectNum('<%= num %>')" /></div>
+                    <label for='numcb<%= acount %>' style='display:block; padding-left:30px;'><%= num %></label>
+                    <div class='clr'></div>
+                </li>
+            <% acount++; } %>
+        </ul>
+    </div>
+    
+    
+    <script>
+        function getSelectedAlgo() {
+            var selectedAlgo = '';
+            $('input:radio.cbalgos').each(function () {
+                if (this.checked) {
+                    selectedAlgo = $(this).val();
+                }
+            });
+            return selectedAlgo;
+        }
+        function getSelectedNum() {
+            var selectedNum = '';
+            $('input:radio.cbnums').each(function () {
+                if (this.checked) {
+                    selectedNum = $(this).val();
+                }
+            });
+            return selectedNum;
+        }
+        function selectAlgo(algoname) {
+            $('#selectedalgotext').text('('+algoname+')');
+            $('#algobox').jqDropdown('hide');
+        }
+        function selectNum(num) {
+            $('#selectednumtext').text('('+num+')');
+            $('#numbox').jqDropdown('hide');
+        }
+        
+        function getRecommendations(rtype, userHistory) {
+            var selectedAlgo = getSelectedAlgo();
+            var selectedNum = getSelectedNum();
+            
+            if (!selectedAlgo) {
+                alert('Please select an algo');
+            }
+            else if (!selectedNum) {
+                alert('Please select number of items in result');
+            }
+            else {
+                $('#recoresponse').hide();
+                $('#loader').show();
+            
+                if (rtype == 'user') {
+                    var userId = $('#userId').val();
+                    
+                    if (typeof(userHistory) != 'undefined' && userHistory) {
+                        var apiCall = '/userHistory?user='+userId+'&channel=<%= channelId %>';
+                        $.getJSON(apiCall, function(data) {
+                            $('#loader').hide();
+                            $('#resultHeading').html("Interaction history for user #"+userId+" <span style='font-weight:300'> (Reverse chronological)</span>");
+                            $('#resultHeadingBox').show();
+                            $('#resultAPI').html(apiCall);
+                            $('#resultAPI').attr('href', apiCall);
+                            $('#APIResponse').html("<pre>"+syntaxHighlight(data)+"</pre>");
+                            $('#recoresponse').show();
+                            $('#showUserHistoryLink').hide();
+                            $('#responseHelp').hide();
+                        });
+                    }
+                    else {
+                        var apiCall = '/recommendations?user='+userId+'&channel=<%= channelId %>&algo='+selectedAlgo+'&num='+selectedNum;
+                        $.getJSON(apiCall, function(data) {
+                            $('#loader').hide();
+                            $('#resultHeading').html("Recommendations for user #"+userId);
+                            $('#resultHeadingBox').show();
+                            $('#resultAPI').html(apiCall);
+                            $('#resultAPI').attr('href', apiCall);
+                            $('#APIResponse').html("<pre>"+syntaxHighlight(data)+"</pre>");
+                            $('#recoresponse').show();
+                            $('#showUserHistoryLink').show();
+                            $('#responseHelp').show();
+                        });
+                    }
+                }
+                else {
+                    var itemId = $('#itemId').val();
+                    var apiCall = '/similarItems?id='+itemId+'&channel=<%= channelId %>&algo='+selectedAlgo+'&num='+selectedNum;
+                    $.getJSON(apiCall, function(data) {
+                        $('#loader').hide();
+                        $('#resultHeading').html("Similar Items for #"+itemId);
+                        $('#resultHeadingBox').show();
+                        $('#resultAPI').html(apiCall);
+                        $('#resultAPI').attr('href', apiCall);
+                        $('#APIResponse').html("<pre>"+syntaxHighlight(data)+"</pre>");
+                        $('#recoresponse').show();
+                        $('#responseHelp').show();
+                    });    
+                }
+            }
+        }
+        
+        function syntaxHighlight(json) {
+            if (typeof json != 'string') {
+                 json = JSON.stringify(json, undefined, 2);
+            }
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'key';
+                    } else {
+                        cls = 'string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+    </script>
+</div>
+
+<% include footer.ejs %>

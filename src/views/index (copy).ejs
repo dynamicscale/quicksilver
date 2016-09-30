@@ -1,0 +1,153 @@
+<% include header.ejs %>
+
+<div style='background:#fefefe; height:40px; box-shadow: 0 5px 5px -5px #ddd;'>
+    <div style='float:right; margin:8px 20px 0 0;'>
+        <a href='#' class='bluebutton' style='font-size:13px;' onclick='openNewChannelForm(); return false;' id='newChannelLink'>New Channel</a>
+    </div>
+    
+    <h2 style='padding:8px 0 0 20px; font-size:18px; font-weight:700; color:#666; font-family:"Open Sans"; letter-spacing: -1px;'>
+        <a href='#' data-jq-dropdown="#jq-dropdown-1"><img src='images/burger.png' style='opacity:0.5' height='25' /></a>
+        <div class='clr'></div>
+    </h2>
+    <div class='clr'></div>
+</div>
+
+<div style='width:700px; margin:30px auto;'>
+    <h2 style='text-align:center; padding:8px 0 0 0px; font-size:24px; font-weight:700; color:#43B33F; font-family:"Open Sans"; letter-spacing: -1px;'>QuickSilver<div class='clr'></div>
+    </h2>
+    
+    <div id='pageHeading' style='text-align:center; font-size:54px; font-weight:400; margin-top:10px; color:#666; font-family:"Open Sans", arial'>Select Your Channel</div>
+        
+    <div style='border-top:0px solid #eee; margin-top:15px; padding-top:20px;'>
+            
+        <div style='width:600px; box-shadow:0px 0px 5px #ccc; padding:15px 50px' id='channellist' class="scrollbar-inner">
+            
+            <div id='addNewChannelFormDiv' style='display:none;'>
+            <form method='POST' action='/saveChannel' id='addChannelForm'>
+            <div style='margin-top:20px;'>
+                <div style='font-size:16px; color:#444; padding-top:8px;'>Channel Name:</div>
+                <div style='margin-top: 10px;'>
+                    <input type='text' name='channel_name' id='channel_name' class='inputboxlarge' style='width:600px;' />
+                </div>
+                <div class='clr' style="margin-top:30px;"></div>
+                
+                <div style='font-size:16px; color:#444; padding-top:8px;'>About:</div>
+                <div style='margin-top: 10px;'>
+                    <input type='text' name='channel_desc' class='inputboxlarge' style='width:600px;' />
+                </div>
+                <div class='clr' style="margin-top:30px;"></div>
+                
+                <div style='font-size:16px; color:#444; padding-top:8px;'>Client:</div>
+                
+                <div style='margin-top: 10px;'>
+                    <select name='clientId' class='inputboxlarge' style='width:600px; background:#fbfbfb; color:#777'>
+                        <option value=''>Select from existing clients</option>
+                        <%
+                            for(var clientId in clients) { 
+                            client = clients[clientId];
+                            if (typeof(client.name) != 'undefined' && client.name) {
+                        %>
+                            <option value='<%= clientId %>'><%= client.name %></option>
+                        <% } } %>
+                    </select>
+                </div>
+                
+                <div style='margin:15px 0; text-align:center; color:#777'>
+                    Or add new client
+                </div>
+                <div style='margin-top: 10px;'>
+                    <input type='text' name='clientNew' class='inputboxlarge' style='width:600px;' />
+                </div>
+                <div class='clr' style="margin-top:30px;"></div>
+                
+                <div style='float:left;'>
+                    <a href='#' onclick="document.getElementById('addChannelForm').submit();" class='zbutton zsmall zwhite'>Submit</a>
+                </div>
+                <div style='float:left; margin-left: 30px; margin-top:8px;'>
+                    <a href='#' onclick="cancelNewChannelForm(); return false;">Cancel</a>
+                </div>
+                <div class='clr'></div>
+            </div>
+            </form>        
+            </div>
+            
+            <div id='listChannelsDiv'>
+            <p>
+            <ul>
+            <% var i = 0; %>
+            <% for(var clientId in clients) { 
+                client = clients[clientId];
+                if (typeof(client.name) != 'undefined' && client.name) {
+            %>
+                <li style='<% if (i >= num-1) { %> border-bottom:none; <% } %>'>
+                    <div style='font-family: "Open Sans", arial; font-size:20px; color:#666; font-weight:bold;'><%= client.name %></div>
+                    <%
+                        if (typeof(client.channels) != 'undefined') {
+                    %>
+                        <div style='margin-left:50px; margin-top:30px;'>
+                    <%
+                            var k = 1;
+                            var numChannels = Object.keys(client.channels).length
+                            for(var channelId in client.channels) {
+                                channel = client.channels[channelId];
+                    %>
+                                <div style='padding-bottom:<% if (k < numChannels) { %>3<% } %>0px;'>
+                                <a href='/channel?id=<%= channelId %>' style='font-family: "Open Sans", arial;'><%= channel.info.name %></a>
+                                <div style='margin-top:8px; color:#888; font-size:15px; font-family: "Open Sans", arial;'><%= channel.info.desc %></div>
+                                <% if (typeof(channel.info.created) != 'undefined') { %>
+                                    <div style='margin-top:12px; color:#888; font-size:12px; font-style: italic;'>Created on <%= moment(parseInt(channel.info.created)).format('D MMMM, YYYY') %></div>
+                                <% } %>
+                                </div>
+                    <%
+                                k++;
+                            }
+                    %>
+                        </div>
+                    <%    
+                        }
+                        else {
+                    %>
+                        <div style='font-family: "Open Sans", arial; font-size:15px; color:#888; padding-top:30px; margin-left:50px;'>No channels have been created for <%= client.name %></div>    
+                    
+                    <% } %>
+                </li>
+                <% if (i%2 == 1) { %>
+                    <div class='clr'></div>
+                <% } %>
+                
+                <% i++; %>
+            <% } } %>
+            </ul>
+            </p>
+            </div>
+        </div>
+        
+        <div id="jq-dropdown-1" class="jq-dropdown jq-dropdown-tip">
+            <ul class="jq-dropdown-menu">
+                <li><a href=''>About</a></li>
+                <li><a href=''>Algorithms Guide</a></li>
+                <li style='border-bottom:none'><a href=''>Contact</a></li>
+            </ul>
+        </div> 
+        
+        <div class='clr'></div>
+    </div>
+<script>
+    function openNewChannelForm() {
+        $('#newChannelLink').hide();
+        $('#addNewChannelFormDiv').show();
+        $('#listChannelsDiv').hide();
+        $('#channel_name').focus();
+        $('#pageHeading').html('Add New Channel');
+    }
+    
+    function cancelNewChannelForm() {
+        $('#newChannelLink').show();
+        $('#addNewChannelFormDiv').hide();
+        $('#listChannelsDiv').show();
+        $('#pageHeading').html('Select Your Channel');
+    }
+</script>    
+</div>
+
+<% include footer.ejs %>

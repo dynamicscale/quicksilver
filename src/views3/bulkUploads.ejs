@@ -1,0 +1,154 @@
+<% include header.ejs %>
+
+<div class='topbar'>
+    <div style='margin:0 auto; width:1200px;'>
+        <!--a href='/' class='logolink'><img src='images/logoicon.png' height='30' /></a-->
+        <% if (typeof(selectedClient) != 'undefined') { %>
+            <div style='float:left;'>
+                <div class='clientmenu'><%= selectedClient.name %>:  <%= channelData.info.name %></div>
+            </div>
+        <% } %>    
+    </div>    
+</div>
+
+<div class='vlinkbox'>
+    <!--div style='margin:0 auto; width:1200px; padding:13px 0 23px 0;'>
+        <h3 style='color:#333;'><span style='color:#777; font-weight:normal; display:none;'>Channel:</span><%= channelData.info.name %></h3>
+        <div class='clr'></div>
+    </div-->
+        
+    <ul class='vlink'>
+        <li><a href='/channel?id=<%= channelId %>'>Dashboard</a></li>
+        <li><a href='/bulkUploads?id=<%= channelId %>'  class='active'>Bulk Uploads</a></li>
+        <li><a href='/channelSettings?id=<%= channelId %>'>Settings</a></li>
+        <li><a href='/testAPI?id=<%= channelId %>'>Test APIs</a></li>
+        <div class='clr'></div>
+    </ul>
+</div>
+
+<div style='margin:0 auto; width:1210px;  padding:0px 0px 30px 0px; min-height:1000px;'>
+    
+    <div style='padding:0 6px;'>
+        <div style='border-bottom:1px solid #eee; padding:0px 0 15px 0; margin-top:30px;'>
+            <div style='margin-top:8px; float:left;'>
+                <h1>Bulk Uploads</h1>
+            </div>
+            <div style='float:right; border: 0px solid #ddd; padding-top:0px;'>
+                <a href='/bulkUpload?channel=<%= channelId %>' class='bluebutton' style='line-height:32px;'>Upload Data</a>
+            </div>
+            <div class='clr'></div>
+        </div>
+    
+        <%
+        var i = 0;
+        if (typeof(bulkUploadResults) != 'undefined' && Object.keys(bulkUploadResults).length > 0) {
+        %>
+        <div style='margin-top:35px;'>
+        <ul>
+        <%
+            channelBulkUploads = [];
+            for (buId in bulkUploadResults) {
+                channelBulkUploads.push([bulkUploadResults[buId]['uploadTime'], bulkUploadResults[buId], buId]);
+            }
+            channelBulkUploads.sort(function(a, b) { return b[0] - a[0]; });
+            //console.log(channelBulkUploads)
+            var numUploads = channelBulkUploads.length;
+            
+            channelBulkUploads.forEach(function(channelBulkUploadData) {
+                //var upload = JSON.parse(channelBulkUploadData[1]);
+                var upload = channelBulkUploadData[1];
+                var uploadId = channelBulkUploadData[2];
+                uploadTime = moment(parseInt(channelBulkUploadData[0])).format('D MMMM, YYYY hh:mm a');
+        %>
+            <li style='<% if (i%2 == 1) { %> padding-left:0px; <% } %> <% if (i >= numUploads-1) { %> border-bottom:none; <% } %>'>
+            <div style='float:left; width:400px; '>
+                <a href='/channel?id=<%= channelId %>'><%= upload.oname %></a>
+                <% if (upload.desc) { %>
+                    <div style='margin-top:8px; color:#555; font-size:13px;'><%= upload.desc %></div>
+                <% } %>
+                
+                <div style='margin-top:10px; color:#777; font-size:12px; font-style: normal;'>Uploaded on <%= uploadTime %></div>
+                
+                <% if (uploadId in bulkUploadData && bulkUploadData[uploadId].hits > 0) { %>
+                    
+                <div style='margin-top:15px; color:#333; font-size:15px; font-weight:bold;'><%= bulkUploadData[uploadId].hits %> Records</div>
+                
+                <div style='margin-top:10px; color:#333; font-size:15px;'>From <%= moment(bulkUploadData[uploadId].chartData[0][0]).format('DD MMMM, YYYY') %> to <%= moment(bulkUploadData[uploadId].chartData[bulkUploadData[uploadId].chartData.length-1][0]).format('DD MMMM, YYYY') %></div>
+                
+                <% } %>
+                
+            </div>
+            
+            <div style='float:left; width:750px; height:140px; margin-left:35px;' id='chart_div_<%= uploadId %>'>
+                <% if (bulkUploadData[uploadId].hits == 0) { %>
+                    <div style='text-align:center; padding-top:0px;'>
+                        <img src='images/processing.png' style='opacity:0.3' />
+                        <br />
+                        <div style='font-family:"Open Sans", arial; font-size:24px; color:#bbb; margin-top:10px;'>Processing</div>
+                    </div>
+                <% } %>
+            </div>
+            
+            <div class='clr'></div>
+            </li>
+            
+            <% i++; %>
+
+        <% }); %>
+        </ul></div>
+        <% } else { %>
+            <div style='margin-top:70px; text-align:center; font-size:16px; color:#777;'>
+                You have not uploaded any data.
+            </div>
+        <% }  %>
+    </div>    
+</div>
+
+<script>
+google.load('visualization', '1', {packages: ['corechart', 'bar']});
+google.setOnLoadCallback(drawMultSeries);
+
+function drawMultSeries()
+{
+    <%
+    for (bname in bulkUploadData) {
+        if(bulkUploadData[bname].hits > 0) {
+        var chartData = bulkUploadData[bname].chartData;
+        var chart_div_name = 'chart_div_'+bname;
+    %>    
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Time of Day');
+    //data.addColumn('number', 'Motivation Level');
+    data.addColumn('number', '');
+  
+    var cdata = [];
+    <% chartData.forEach(function(cd) { %>
+        cdata.push([new Date('<%= cd[0] %>'), <%= cd[1] %>]);
+    <% }); %>    
+  
+    data.addRows(cdata);  
+      
+    var options = {
+        title: '',
+        hAxis: {
+          title: '',
+          gridlines: {color: '#f6f6f6'}
+        },
+        vAxis: {
+          title: '',
+          gridlines: {color: '#f6f6f6'}
+        },
+        colors: ['#81C9E8'],
+        legend: {'position' : 'none'},
+        top:0,
+        chartArea: {width : '1030', left:'100', height: '100', top: '10'}
+    };
+
+    var chart = new google.visualization.AreaChart(document.getElementById('<%= chart_div_name %>'));
+
+    chart.draw(data, options);
+    <% } } %>
+}
+</script>
+
+<% include footer.ejs %>
